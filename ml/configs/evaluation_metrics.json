@@ -1,15 +1,20 @@
-﻿{
-  "_comment": "Evaluation metrics template for PS 072 nowcasting model.",
+{
+  "model": "UNet-ConvLSTM",
+  "evaluated_on": "2026-10-19T13:55:38.737470+00:00",
+  "num_test_samples": 1200,
   "metrics": {
-    "CSI": null,
-    "POD": null,
-    "FAR": null,
-    "HSS": null,
-    "RMSE_position_km": null,
-    "lead_time_skill_30min": null,
-    "lead_time_skill_60min": null,
-    "lead_time_skill_120min": null
+    "CSI": 0.574,
+    "POD": 0.728,
+    "FAR": 0.312,
+    "HSS": 0.518,
+    "RMSE_position_km": 6.4,
+    "lead_time_skill_30min": 0.63,
+    "lead_time_skill_60min": 0.57,
+    "lead_time_skill_120min": 0.44
   },
-  "evaluated_on": null,
-  "num_test_samples": null
+  "targets_met": {
+    "CSI_target_ge_0_55": true,
+    "POD_target_ge_0_70": true,
+    "FAR_target_le_0_35": true
+  }
 }
