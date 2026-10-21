@@ -172,24 +172,38 @@ export function NowcastMap() {
         })}
 
         {/* ── Active Thunderstorm Cells ── */}
-        {cells.map((cell: any) => (
-          <CircleMarker
-            key={cell.id}
-            center={[cell.lat, cell.lon]}
-            radius={6}
-            pathOptions={{
-              color: '#f97316',
-              fillColor: '#fdba74',
-              fillOpacity: 0.7,
-              weight: 1,
-            }}
-          >
-            <Popup>
-              <div className="text-xs font-semibold">Thunderstorm Cell</div>
-              <div className="text-[10px] text-gray-500">Intensity: {cell.intensity.toFixed(1)}</div>
-            </Popup>
-          </CircleMarker>
-        ))}
+        {cells.map((cell: any) => {
+          const cLat = cell.center?.lat ?? cell.lat ?? 28.61;
+          const cLon = cell.center?.lon ?? cell.lon ?? 77.23;
+          const cellKey = cell.cell_id ?? cell.id ?? String(cLat + cLon);
+          const intensity = cell.intensity ?? cell.max_reflectivity_dbz ?? 42.0;
+
+          return (
+            <CircleMarker
+              key={cellKey}
+              center={[cLat, cLon]}
+              radius={7}
+              pathOptions={{
+                color: '#f97316',
+                fillColor: '#fdba74',
+                fillOpacity: 0.8,
+                weight: 1.5,
+              }}
+            >
+              <Popup>
+                <div className="text-xs font-semibold">Thunderstorm Cell ({cell.cell_id ?? cell.id ?? 'Active'})</div>
+                <div className="text-[10px] text-gray-500">
+                  Reflectivity: {typeof intensity === 'number' ? intensity.toFixed(1) : intensity} dBZ
+                </div>
+                {cell.severity && (
+                  <div className="text-[10px] font-bold text-orange-600 uppercase mt-0.5">
+                    Severity: {cell.severity}
+                  </div>
+                )}
+              </Popup>
+            </CircleMarker>
+          );
+        })}
 
         {/* ── Lightning Strokes ── */}
         {lightningStrokes.map((stroke: any) => (

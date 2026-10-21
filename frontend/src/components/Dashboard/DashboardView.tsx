@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Cloud, Zap, AlertTriangle, MapPin, Settings2, Plus, Minus, Layers } from 'lucide-react';
 import { NowcastMap } from './NowcastMap';
+import { AlertTicker } from './AlertTicker';
+import { TimeSlider } from './TimeSlider';
 import { useNowcastStore } from '../../store/useNowcastStore';
 import { RISK_LEVEL_CONFIG, type RiskLevel } from '../../types/nowcast';
 
@@ -25,6 +27,7 @@ const MAP_LAYERS = [
 export function DashboardView() {
   const { alerts, cells, lightningStrokes, selectedLayer, setSelectedLayer, fetchActiveAlerts, fetchLatestNowcast, fetchRadarAndLightning } = useNowcastStore();
   const [isFullScreen, setIsFullScreen] = React.useState(false);
+  const [selectedMinute, setSelectedMinute] = useState<number>(0);
   
   React.useEffect(() => {
     fetchActiveAlerts();
@@ -86,6 +89,7 @@ export function DashboardView() {
 
   return (
     <div className="flex flex-col h-full gap-3 p-4 overflow-y-auto">
+      <AlertTicker alerts={alerts} />
       {/* Top Stats Cards */}
       <div className="grid grid-cols-4 gap-2 shrink-0">
         {statsData.map((stat) => (
@@ -157,6 +161,9 @@ export function DashboardView() {
                 <span>100</span>
               </div>
             </div>
+          </div>
+          <div className="p-3 bg-nowcast-sidebar border-t border-nowcast-card shrink-0">
+            <TimeSlider currentMinute={selectedMinute} onChange={setSelectedMinute} />
           </div>
         </div>
 
