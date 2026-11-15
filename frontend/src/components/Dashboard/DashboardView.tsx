@@ -25,9 +25,8 @@ const MAP_LAYERS = [
 ] as const;
 
 export function DashboardView() {
-  const { alerts, cells, lightningStrokes, selectedLayer, setSelectedLayer, fetchActiveAlerts, fetchLatestNowcast, fetchRadarAndLightning } = useNowcastStore();
+  const { alerts, cells, lightningStrokes, selectedLayer, setSelectedLayer, forecastMinute, setForecastMinute, fetchActiveAlerts, fetchLatestNowcast, fetchRadarAndLightning } = useNowcastStore();
   const [isFullScreen, setIsFullScreen] = React.useState(false);
-  const [selectedMinute, setSelectedMinute] = useState<number>(0);
   
   React.useEffect(() => {
     fetchActiveAlerts();
@@ -143,8 +142,8 @@ export function DashboardView() {
             <NowcastMap />
             
             {/* Overlay UI on top of Map */}
-            <div className="absolute top-4 right-4 z-[400] bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded text-xs border border-white/10 shadow-lg">
-              Valid Time: 14:45 UTC (+15 min)
+            <div className="absolute top-4 right-4 z-[400] bg-black/70 backdrop-blur-md text-nowcast-accent px-3 py-1.5 rounded-md text-xs font-mono font-bold border border-nowcast-accent/30 shadow-lg">
+              {forecastMinute === 0 ? 'Radar Scan: Live (T = 0)' : `Forecast Valid: T + ${forecastMinute} min`}
             </div>
 
             {/* Map controls moved to NowcastMap */}
@@ -163,7 +162,7 @@ export function DashboardView() {
             </div>
           </div>
           <div className="p-3 bg-nowcast-sidebar border-t border-nowcast-card shrink-0">
-            <TimeSlider currentMinute={selectedMinute} onChange={setSelectedMinute} />
+            <TimeSlider currentMinute={forecastMinute} onChange={setForecastMinute} />
           </div>
         </div>
 

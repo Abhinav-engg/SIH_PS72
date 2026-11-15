@@ -54,9 +54,13 @@ async def get_latest_nowcast(db: AsyncSession = Depends(get_db)) -> dict:
             "count": len(live.get("cells", [])),
         }
 
+    serialized = [serialize_nowcast(n) for n in nowcasts]
     return {
-        "nowcasts": [serialize_nowcast(n) for n in nowcasts],
-        "count": len(nowcasts),
+        "nowcasts": serialized,
+        "cells": serialized,
+        "issued_at": nowcasts[0].run_time.isoformat() if nowcasts[0].run_time else None,
+        "model": {"name": "ps72-unet-convlstm", "version": "1.0.0", "source": "database"},
+        "count": len(serialized),
     }
 
 

@@ -35,9 +35,9 @@ class CombinedNowcastLoss(nn.Module):
         radar_weight = 1.0 + (self.weight_severe - 1.0) * (true_radar >= 0.5).float()
         radar_mse = torch.mean(radar_weight * ((pred_radar - true_radar) ** 2))
 
-        pos_weight = torch.tensor([5.0], device=y_pred.device)
+        lightning_weight = 1.0 + 4.0 * (true_lightning >= 0.5).float()
         lightning_bce = F.binary_cross_entropy(
-            pred_lightning, true_lightning, pos_weight=pos_weight
+            pred_lightning, true_lightning, weight=lightning_weight
         )
 
         pred_bin = torch.clamp(pred_radar, 0.0, 1.0)
@@ -56,6 +56,7 @@ def train_model(
     epochs=5,
     batch_size=2,
     lr=0.0005,
+    hidden_channels=64,
     data_dir=None,
     checkpoint_dir="ml/checkpoints",
     device=None,
@@ -80,7 +81,7 @@ def train_model(
     model = UNetConvLSTM(
         in_channels=7,
         out_channels=2,
-        hidden_channels=32,
+        hidden_channels=hidden_channels,
         t_in=4,
         t_out=8,
     )
@@ -126,6 +127,7 @@ def train_model(
                 torch.save(
                     {
                         "epoch": epoch,
+                        "state_dict": model.state_dict(),
                         "model_state_dict": model.state_dict(),
                         "loss": best_loss,
                     },

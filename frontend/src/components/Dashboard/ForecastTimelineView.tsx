@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { NowcastMap } from './NowcastMap';
 import { TimeSlider } from './TimeSlider';
 import { Calendar, Layers } from 'lucide-react';
+import { useNowcastStore } from '../../store/useNowcastStore';
 
 export function ForecastTimelineView() {
-  const [selectedMinute, setSelectedMinute] = useState<number>(0);
+  const { forecastMinute, setForecastMinute } = useNowcastStore();
+  const [selectedMinute, setSelectedMinute] = useState<number>(forecastMinute);
   const [mode, setMode] = useState<'all' | 'radar' | 'lightning'>('all');
 
   const timelineSteps = [
@@ -69,16 +71,19 @@ export function ForecastTimelineView() {
           return (
             <div
               key={step.min}
-              onClick={() => setSelectedMinute(step.min)}
+              onClick={() => {
+                setSelectedMinute(step.min);
+                setForecastMinute(step.min);
+              }}
               className={`bg-nowcast-sidebar border rounded-xl overflow-hidden flex flex-col min-h-[200px] cursor-pointer transition-all ${
-                isActive
+                selectedMinute === step.min
                   ? 'border-nowcast-accent shadow-[0_0_12px_rgba(204,255,0,0.18)]'
                   : 'border-nowcast-card hover:border-nowcast-border'
               }`}
             >
               <div className="bg-nowcast-card/70 px-3 py-1.5 border-b border-nowcast-card text-xs font-bold text-nowcast-text flex justify-between items-center">
                 <span>{step.title}</span>
-                {isActive && (
+                {selectedMinute === step.min && (
                   <span className="text-[10px] font-mono text-nowcast-accent bg-nowcast-accent/10 px-1.5 py-0.5 rounded">
                     Active
                   </span>
@@ -93,7 +98,13 @@ export function ForecastTimelineView() {
       </div>
 
       <div className="shrink-0 mt-1">
-        <TimeSlider currentMinute={selectedMinute} onChange={setSelectedMinute} />
+        <TimeSlider
+          currentMinute={selectedMinute}
+          onChange={(m) => {
+            setSelectedMinute(m);
+            setForecastMinute(m);
+          }}
+        />
       </div>
     </div>
   );

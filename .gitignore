@@ -34,6 +34,14 @@ data/processed/
 ml/checkpoints/*.pt
 ml/checkpoints/*.pth
 ml/checkpoints/*.onnx
+model_artifacts/checkpoints/*.pt
+model_artifacts/checkpoints/*.pth
+model_artifacts/checkpoints/*.onnx
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
 
 # OS
 .DS_Store
