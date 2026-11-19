@@ -1,6 +1,6 @@
 {
   "model": "UNet-ConvLSTM",
-  "evaluated_on": "2026-11-19T15:46:53.387180+00:00",
+  "evaluated_on": "2026-11-19T15:49:14.442884+00:00",
   "num_test_samples": 1200,
   "metrics": {
     "CSI": 0.574,
