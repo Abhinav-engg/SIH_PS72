@@ -7,7 +7,7 @@ dev-frontend:
 	cd frontend && npm run dev
 
 dev-backend:
-	cd backend && PYTHONPATH=..:app:$(PYTHONPATH) ../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+	cd backend && PYTHONPATH=..:. ../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
 test:
 	PYTHONPATH=backend:. .venv/bin/pytest backend/tests
