@@ -14,9 +14,10 @@
   - C0: Predicted Radar Reflectivity (0–120 min ahead, 15-min intervals)
   - C1: Predicted Lightning Strike Probability [0, 1]
 
-## Evaluation Metrics (Target vs Verified)
-- **CSI (Critical Success Index)**: Target ≥ 0.55 | Verified = 0.574
-- **POD (Probability of Detection)**: Target ≥ 0.70 | Verified = 0.728
-- **FAR (False Alarm Ratio)**: Target ≤ 0.35 | Verified = 0.312
-- **HSS (Heidke Skill Score)**: Verified = 0.518
-- **GPU Inference Latency**: Target < 3.0s | Verified = 1.8s
+## Evaluation Metrics & Operational Targets
+- **Target CSI (Critical Success Index)**: Target ≥ 0.55 (Convective cores ≥ 35 dBZ)
+- **Target POD (Probability of Detection)**: Target ≥ 0.70
+- **Target FAR (False Alarm Ratio)**: Target ≤ 0.35
+- **Target HSS (Heidke Skill Score)**: Target ≥ 0.45
+- **Target GPU Latency**: Target < 3.0s per 512x512 tile
+- **Current Status**: Pilot checkpoint initialized. Formal CSI/POD/FAR benchmarking is computed on held-out storm validation splits (`ml/src/evaluate.py`).
