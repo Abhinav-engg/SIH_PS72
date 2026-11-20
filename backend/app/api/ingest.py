@@ -9,7 +9,7 @@ async def ingest_radar() -> dict:
     from app.ingestion.radar.processor import RadarProcessor
 
     processor = RadarProcessor()
-    grid = processor.process()
+    grid, mask = processor.process()
     now_iso = datetime.now(timezone.utc).isoformat()
     return {
         "status": "success",
@@ -17,6 +17,7 @@ async def ingest_radar() -> dict:
         "timestamp": now_iso,
         "grid_shape": list(grid.shape),
         "max_dbz_normalized": float(grid.max()),
+        "has_observations": bool(mask.max() > 0),
     }
 
 
@@ -25,13 +26,14 @@ async def ingest_lightning() -> dict:
     from app.ingestion.lightning.processor import LightningProcessor
 
     processor = LightningProcessor()
-    grid = processor.process()
+    grid, mask = processor.process()
     now_iso = datetime.now(timezone.utc).isoformat()
     return {
         "status": "success",
         "source": "lightning",
         "timestamp": now_iso,
         "grid_shape": list(grid.shape),
+        "has_observations": bool(mask.max() > 0),
     }
 
 
