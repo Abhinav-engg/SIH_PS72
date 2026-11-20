@@ -55,6 +55,7 @@ def serialize_alert(alert: Alert) -> dict:
 
 
 @router.get("/")
+@router.get("/active")
 async def get_active_alerts(db: AsyncSession = Depends(get_db)) -> dict:
     now = datetime.now(timezone.utc)
     try:
