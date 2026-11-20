@@ -35,6 +35,8 @@ def serialize_nowcast(nowcast: Nowcast) -> dict:
 
 
 @router.get("/")
+@router.get("/predict")
+@router.get("/latest")
 async def get_latest_nowcast(db: AsyncSession = Depends(get_db)) -> dict:
     try:
         stmt = select(Nowcast).order_by(Nowcast.run_time.desc()).limit(10)
