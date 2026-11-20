@@ -41,6 +41,21 @@ async def test_ingest_lightning(client):
     assert data["source"] == "lightning"
 
 
+@pytest.mark.asyncio
+async def test_api_v1_endpoints(client):
+    res_nowcast = await client.get("/api/v1/nowcast/")
+    assert res_nowcast.status_code == 200
+
+    res_alerts = await client.get("/api/v1/alerts/active")
+    assert res_alerts.status_code == 200
+
+    res_metrics = await client.get("/api/v1/metrics")
+    assert res_metrics.status_code == 200
+    metrics_data = res_metrics.json()
+    assert "status" in metrics_data
+    assert "metrics" in metrics_data
+
+
 def test_ml_inference_mode():
     res = run_nowcast(include_demo_cells=True)
     assert res["model"]["mode"] in ["real", "stub"]
