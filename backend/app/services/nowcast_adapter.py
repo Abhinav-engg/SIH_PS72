@@ -1,13 +1,14 @@
 from __future__ import annotations
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 _NOWCAST_STUB: dict[str, Any] = {
     "nowcast_id": "stub-001",
-    "issued_at": "2026-09-26T15:00:00Z",
-    "valid_until": "2026-09-26T17:00:00Z",
+    "issued_at": "2026-11-20T12:00:00Z",
+    "valid_until": "2026-11-20T14:00:00Z",
     "horizon_minutes": 120,
     "interval_minutes": 15,
     "timesteps": [15, 30, 45, 60, 75, 90, 105, 120],
@@ -32,7 +33,7 @@ _NOWCAST_STUB: dict[str, Any] = {
             ],
         },
     ],
-    "model": {"name": "ps72-nowcast-stub", "version": "0.1.0"},
+    "model": {"name": "ps72-nowcast-stub", "version": "0.1.0", "mode": "stub", "checkpoint_loaded": False},
     "data_sources_used": ["radar", "satellite", "lightning"],
 }
 
@@ -49,9 +50,9 @@ def _detect_mode() -> str:
         pass
 
     try:
-        import ml.inference
-        return "real"
-    except ImportError:
+        from ml.inference import is_checkpoint_loaded
+        return "real" if is_checkpoint_loaded() else "stub"
+    except Exception:
         return "stub"
 
 
@@ -59,7 +60,27 @@ def _get_mode() -> str:
     global _MODE
     if _MODE is None:
         _MODE = _detect_mode()
+        if _MODE == "stub":
+            logger.warning(
+                "[ML ADAPTER] Running in STUB MODE — valid trained checkpoint not loaded or ML_FORCE_STUB=true."
+            )
+        else:
+            logger.info("[ML ADAPTER] Running in REAL MODE — trained checkpoint loaded.")
     return _MODE
+
+
+def get_stub_nowcast() -> dict[str, Any]:
+    now = datetime.now(timezone.utc)
+    stub = dict(_NOWCAST_STUB)
+    stub["issued_at"] = now.isoformat()
+    stub["valid_until"] = (now + timedelta(minutes=120)).isoformat()
+    stub["model"] = {
+        "name": "ps72-nowcast-stub",
+        "version": "0.1.0",
+        "mode": "stub",
+        "checkpoint_loaded": False,
+    }
+    return stub
 
 
 def run_nowcast(
@@ -67,6 +88,7 @@ def run_nowcast(
     satellite_data: Any | None = None,
     lightning_data: Any | None = None,
     nwp_data: Any | None = None,
+    include_demo_cells: bool = False,
 ) -> dict[str, Any]:
     if _get_mode() == "real":
         try:
@@ -76,13 +98,14 @@ def run_nowcast(
                 satellite_data=satellite_data,
                 lightning_data=lightning_data,
                 nwp_data=nwp_data,
+                include_demo_cells=include_demo_cells,
             )
             if isinstance(result, dict) and "cells" in result:
                 return result
         except Exception as exc:
             logger.error(f"Inference error: {exc}")
 
-    return dict(_NOWCAST_STUB)
+    return get_stub_nowcast()
 
 
 def reset_mode() -> None:

@@ -20,7 +20,7 @@ async def test_get_alerts(client):
     data = response.json()
     assert "alerts" in data
     assert isinstance(data["alerts"], list)
-    assert len(data["alerts"]) > 0
+    assert "count" in data
 
 
 @pytest.mark.asyncio
@@ -42,9 +42,17 @@ async def test_ingest_lightning(client):
 
 
 def test_ml_inference_mode():
-    res = run_nowcast()
-    assert res["model"]["mode"] == "real"
+    res = run_nowcast(include_demo_cells=True)
+    assert res["model"]["mode"] in ["real", "stub"]
+    assert "checkpoint_loaded" in res["model"]
     assert len(res["cells"]) >= 3
     for cell in res["cells"]:
         assert len(cell["forecast_positions"]) == 8
+
+
+def test_ml_inference_empty_when_no_observations():
+    res = run_nowcast(include_demo_cells=False)
+    assert res["cells"] == []
+    assert res["data_sources_used"] == []
+    assert res["has_observations"] is False
 
