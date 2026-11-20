@@ -1,32 +1,39 @@
 import os
-from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Dict, Optional
 import numpy as np
 
 from app.ingestion.base import BaseIngestor
 from app.ingestion.nwp.processor import NWPProcessor
+from app.core.config import get_settings
+
+settings = get_settings()
 
 
 class GFSClient(BaseIngestor):
     def __init__(self):
         super().__init__(source_name="GFS_NWP")
-        self.processor = NWPProcessor()
+        self.processor = NWPProcessor(
+            target_h=settings.pilot_grid_h,
+            target_w=settings.pilot_grid_w,
+        )
 
     async def fetch(self) -> Any:
-        sample_dir = os.path.join("data", "raw", "nwp")
+        sample_dir = settings.nwp_data_dir
         if os.path.exists(sample_dir):
-            files = [f for f in os.listdir(sample_dir) if f.endswith((".grib2", ".grb2", ".nc", ".npy"))]
+            files = [
+                os.path.join(sample_dir, f)
+                for f in sorted(os.listdir(sample_dir))
+                if f.endswith((".grib2", ".grb2", ".nc", ".npy", ".hdf5"))
+            ]
             if files:
-                return os.path.join(sample_dir, files[0])
+                return files[-1]
 
-        rng = np.random.RandomState(int(datetime.now(timezone.utc).timestamp()) % 1000)
-        cape = rng.uniform(500.0, 4200.0, (512, 512)).astype(np.float32)
-        cin = rng.uniform(10.0, 250.0, (512, 512)).astype(np.float32)
+        return None
 
-        return {"cape": cape, "cin": cin}
-
-    async def process(self, raw_data: Any) -> Any:
-        if isinstance(raw_data, dict):
+    async def process(self, raw_data: Any) -> Dict[str, np.ndarray]:
+        if isinstance(raw_data, str) and os.path.exists(raw_data):
+            return self.processor.process(file_path=raw_data)
+        elif isinstance(raw_data, dict):
             return self.processor.process(
                 cape=raw_data.get("cape"),
                 cin=raw_data.get("cin"),
