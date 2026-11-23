@@ -10,12 +10,12 @@ router = APIRouter(tags=["websocket"])
 
 async def broadcast_nowcast(data: dict):
     await ws_manager.send_to_channel("nowcast", data)
-    await ws_manager.broadcast_all(data)
+    await ws_manager.broadcast(data)
 
 
 async def broadcast_alerts(data: dict):
     await ws_manager.send_to_channel("alerts", data)
-    await ws_manager.broadcast_all(data)
+    await ws_manager.broadcast(data)
 
 
 @router.websocket("/ws/nowcast")
