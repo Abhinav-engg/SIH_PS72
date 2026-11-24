@@ -61,6 +61,15 @@ def get_model(device="cpu"):
                                 loaded = True
                             except Exception:
                                 pass
+                    if isinstance(ckpt, dict) and "state_dict" in ckpt:
+                        model.load_state_dict(ckpt["state_dict"])
+                        loaded = True
+                    elif isinstance(ckpt, dict) and "model_state_dict" in ckpt:
+                        model.load_state_dict(ckpt["model_state_dict"])
+                        loaded = True
+                    elif isinstance(ckpt, dict):
+                        model.load_state_dict(ckpt)
+                        loaded = True
                     if loaded:
                         break
                 except Exception:
@@ -180,6 +189,10 @@ def run_nowcast(
                     if mean_pred_dbz > 10.0:
                         base_dbz = round(0.5 * base_dbz + 0.5 * mean_pred_dbz, 1)
                     if mean_pred_prob > 0.05:
+                    mean_pred_prob = float(pred_tensor[0, :, 1].mean().item())
+                    if mean_pred_dbz > 10.0:
+                        base_dbz = round(0.5 * base_dbz + 0.5 * mean_pred_dbz, 1)
+                    if mean_pred_prob > 0.1:
                         base_prob = round(0.5 * base_prob + 0.5 * mean_pred_prob, 2)
                 except Exception:
                     pass
