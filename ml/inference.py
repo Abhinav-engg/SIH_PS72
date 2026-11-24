@@ -25,8 +25,8 @@ def get_model(device="cpu"):
         from ml.src.model import UNetConvLSTM
 
         model = UNetConvLSTM(
-            in_channels=7,
-            out_channels=2,
+            in_channels=14,
+            out_channels=3,
             hidden_channels=64,
             t_in=4,
             t_out=8,
@@ -43,6 +43,24 @@ def get_model(device="cpu"):
             if os.path.exists(path) and os.path.getsize(path) > 0:
                 try:
                     ckpt = torch.load(path, map_location=device, weights_only=False)
+                    sd = None
+                    if isinstance(ckpt, dict) and "state_dict" in ckpt:
+                        sd = ckpt["state_dict"]
+                    elif isinstance(ckpt, dict) and "model_state_dict" in ckpt:
+                        sd = ckpt["model_state_dict"]
+                    elif isinstance(ckpt, dict):
+                        sd = ckpt
+
+                    if sd is not None:
+                        try:
+                            model.load_state_dict(sd, strict=True)
+                            loaded = True
+                        except Exception:
+                            try:
+                                model.load_state_dict(sd, strict=False)
+                                loaded = True
+                            except Exception:
+                                pass
                     if isinstance(ckpt, dict) and "state_dict" in ckpt:
                         model.load_state_dict(ckpt["state_dict"])
                         loaded = True
@@ -164,6 +182,13 @@ def run_nowcast(
             if pred_tensor is not None:
                 try:
                     mean_pred_dbz = float(pred_tensor[0, :, 0].mean().item()) * 70.0
+                    if pred_tensor.shape[2] > 1:
+                        mean_pred_prob = float(pred_tensor[0, :, 1].mean().item())
+                    else:
+                        mean_pred_prob = float(pred_tensor[0, :, 0].mean().item())
+                    if mean_pred_dbz > 10.0:
+                        base_dbz = round(0.5 * base_dbz + 0.5 * mean_pred_dbz, 1)
+                    if mean_pred_prob > 0.05:
                     mean_pred_prob = float(pred_tensor[0, :, 1].mean().item())
                     if mean_pred_dbz > 10.0:
                         base_dbz = round(0.5 * base_dbz + 0.5 * mean_pred_dbz, 1)
